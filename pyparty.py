@@ -8,6 +8,11 @@ import os
 import glob
 import uuid
 
+#uses pyqrcode, to install on debian-jessie: pip3 install pyqrcode
+#uses pypng, to install on debian-jessie: pip3 install pypng
+import pyqrcode
+
+
 # Default PORT
 PORT = 8000
 
@@ -159,7 +164,19 @@ with open(indexfile, "w") as idx:
 
 print("serving at port", PORT)
 
+server_url= "http://{}:{}/{}".format(http.server.socket.gethostname(),
+                                    PORT, rstr)
 print("\n", "Clients can use the following URL to post pictures:\n\n",
-      "http://{}:{}/{}".format(http.server.socket.gethostname(),
-                               PORT, rstr), "\n" * 3)
+     server_url, "\n")
+
+# for convenience: print corresponding qr-code and 
+# save it as png and svg:
+server_url_qr = pyqrcode.create(server_url, error='H')
+print(server_url_qr.terminal(module_color='black',background='white', 
+			     quiet_zone=1))
+server_url_qr.svg("pyparty_server_url_qr.svg", scale=8)
+server_url_qr.png("pyparty_server_url_qr.png", scale=8, 
+		  module_color=[0, 0, 0, 255], background=[0xff, 0xff, 0xff])
+
+
 httpd.serve_forever()
